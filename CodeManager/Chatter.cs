@@ -19,7 +19,7 @@ namespace CodeManager
         public Chatter(string _url=null)
         {
             if (_url != null) url = _url;
-            else url = "https://origincube.cn/chatapi";
+            else url = "";
             wc = new WebClient();
             wc.Headers[HttpRequestHeader.ContentType] = "application/json";
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
