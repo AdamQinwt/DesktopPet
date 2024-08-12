@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace CodeManager
 {
@@ -23,6 +25,7 @@ namespace CodeManager
         public FrmDisplay()
         {
             InitializeComponent();
+            checkRunning();
             random = new Random();
             frmInteract = new FrmInteract();
             isDragging = false;
@@ -31,6 +34,32 @@ namespace CodeManager
             currentGIFIdx = 0;
             swapGIFInterval = -1;
             initSelectableGIFs("gifs.ini");
+        }
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+        [DllImport("user32.dll")]
+        private static extern bool SetFocus(IntPtr hWnd);
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd,int nCmdShow);
+        [DllImport("user32.dll")]
+        private static extern void SwitchToThisWindow(IntPtr hWnd, bool fAltTab);
+        private void checkRunning(string name="CodeManager")
+        {
+            int currentId = Process.GetCurrentProcess().Id;
+            Process[] processes = Process.GetProcessesByName(name);
+            if (processes.Length > 0)
+            {
+                foreach(Process tmp in processes)
+                {
+                    if (tmp.Id == currentId) continue;
+                    IntPtr handle = processes[0].MainWindowHandle;
+                    SetFocus(handle);
+                    SetForegroundWindow(handle);
+                    ShowWindow(handle,5);
+                    SwitchToThisWindow(handle, true);
+                    Environment.Exit(0);
+                }
+            }
         }
         private String interact()
         {
@@ -223,6 +252,10 @@ namespace CodeManager
         {
             changeGIF(random.Next(0, selectableGIFs.Count));
             timerMain.Start();
+        }
+
+        private void FrmDisplay_Load(object sender, EventArgs e)
+        {
         }
 
         private void lastGIF()

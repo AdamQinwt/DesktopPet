@@ -52,7 +52,7 @@ namespace CodeManager
             summaryFields = _sfield;
             summaryLen = _slen;
         }
-        public void ReadFrom(SQLiteDataReader reader)
+        public void ReadFrom(SQLiteDataReader reader,bool raw=false)
         {
             currentRead = new List<Dictionary<string, object>>();
             Dictionary<String, object> tmp;
@@ -74,7 +74,7 @@ namespace CodeManager
                             break;
                         case DBManager.FieldType.text:
                         case DBManager.FieldType.longtext:
-                            tmp.Add(kv.Key, DBManager.fromDBString(itm));
+                            tmp.Add(kv.Key, raw?itm:(DBManager.fromDBString(itm)));
                             break;
                     }
                 }

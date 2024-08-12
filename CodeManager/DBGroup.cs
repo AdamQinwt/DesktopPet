@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -70,6 +71,28 @@ namespace CodeManager
             db.Remove(tname);
             db["tables"].DeleteMatch(tname);
             return tname + " dropped.";
+        }
+        public String exportTable(String tname,String fname, String fmt)
+        {
+            if (!(db.ContainsKey(tname))) throw new Exception("Error! " + tname + " Not Found!");
+            QueryResult qr = db[tname].FilterData("",true);
+            FileDao.ToTXT(qr.currentRead, fname);
+            return "Success.";
+        }
+        public String importTable(String tname,String fname,String fmt)
+        {
+            List<Dictionary<String, Object>> data = FileDao.FromTXT(fname);
+            String ret = "";
+            if (!(db.ContainsKey(tname))) throw new Exception("Error! " + tname + " Not Found!");
+            foreach(Dictionary<String, Object> dict in data)
+            {
+                try { db[tname].AppendData(dict); }
+                catch(Exception ex)
+                {
+                    ret += "Error! " + ex + "\n";
+                }
+            }
+            return ret+"Successfully loaded data into "+tname+".";
         }
         public String FindInTable(String tname,String filterString="")
         {
@@ -153,15 +176,32 @@ namespace CodeManager
                 
             }
         }
+        public String Backup()
+        {
+            try { File.Copy(fname, fname + "backup"); }
+            catch(Exception ex) { return ex.ToString(); }
+            return "Success";
+        }
+        public String UseBackup()
+        {
+            if (!File.Exists(fname + "backup")) return "No backups found!";
+            setOnline(false);
+            File.Copy(fname, fname + "tmp");
+            File.Delete(fname);
+            File.Move(fname + "backup", fname );
+            File.Move(fname + "tmp", fname + "backup");
+            setOnline(true);
+            return "Success!";
+        }
         public Dictionary<String,object> Check(ref int idx)
         {
             return currentRead.Check(ref idx);
         }
-        public void Close()
+        public void setOnline(bool online)
         {
             foreach(DBManager db0 in db.Values)
             {
-                db0.Close();
+                db0.Online=online;
             }
         }
         public override string ToString()
@@ -169,7 +209,7 @@ namespace CodeManager
             String s = "Tables:\n";
             foreach(KeyValuePair<String,DBManager> kv in db)
             {
-                s += "\t" + kv.Key + ": " + kv.Value + "\n";
+                s += "\t" + kv.Key + ": " + kv.Value.ToString() + "\n";
             }
             return s;
         }

@@ -142,6 +142,7 @@
             this.Text = "CodeManager";
             this.TopMost = true;
             this.TransparencyKey = System.Drawing.Color.White;
+            this.Load += new System.EventHandler(this.FrmDisplay_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pbMain)).EndInit();
             this.contextMenuMain.ResumeLayout(false);
             this.contextMenuMin.ResumeLayout(false);

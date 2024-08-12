@@ -15,6 +15,7 @@ namespace CodeManager
         String tableName, descriptionStr;
         int numFields;
         String[] fields;
+        public String[] FieldNames { get { return fields; } }
         public String[] requiredDataFields;
         public enum FieldType
         {
@@ -39,7 +40,7 @@ namespace CodeManager
         {
             if (SpecialSymbolsFrom == null) DBManager.defineSpecialSymbols(new String[] { "\\","\"","\'","%","&"," ","\t","\n","\r","{","}","[","]","(",")",",",".",";",":","!","?"});
             sql = new SQLiteConnection("data source=" + fname);
-            sql.Open();
+            Online = true;
             cmd = new SQLiteCommand(sql);
             reader = null;
             tableName = _tableName;
@@ -83,18 +84,20 @@ namespace CodeManager
             cmd.CommandText = s;
             cmd.ExecuteNonQuery();
         }
-        private int readData(String s)
+        private int readData(String s,bool raw=false)
         {
             cmd.CommandText = s;
             using (reader = cmd.ExecuteReader())
             {
-                qr.ReadFrom(reader);
+                qr.ReadFrom(reader,raw);
             }
             return qr.Count;
         }
-        public void Close()
+        private bool _online;
+        public bool Online
         {
-            sql.Close();
+            set { _online = value; if (_online) sql.Open(); else sql.Close(); }
+            get { return _online; }
         }
         public void CreateTable()
         {
@@ -130,7 +133,7 @@ namespace CodeManager
         {
             doNoQuery("drop table " + tableName);
         }
-        public QueryResult FilterData(String filterStr="")
+        public QueryResult FilterData(String filterStr="",bool raw=false)
         {
             String cmd = "Select * from " + tableName;
             if(filterStr!="")
@@ -174,7 +177,7 @@ namespace CodeManager
                     }
                 }
             }
-            readData(cmd);
+            readData(cmd,raw);
             return qr;
         }
 
@@ -239,6 +242,7 @@ namespace CodeManager
             bool isFirst = true;
             foreach(KeyValuePair<String,object> kv in entry)
             {
+                if (kv.Key== defaultIdField) continue;
                 if(isFirst)
                 {
                     isFirst = false;
@@ -254,6 +258,7 @@ namespace CodeManager
             isFirst = true;
             foreach (KeyValuePair<String, object> kv in entry)
             {
+                if (kv.Key == defaultIdField) continue;
                 if (isFirst)
                 {
                     isFirst = false;

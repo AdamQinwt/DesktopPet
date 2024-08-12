@@ -82,6 +82,10 @@ namespace CodeManager
             handler.register("startup", editStartUp, "Edit StartUp Commands.");
             handler.register("gif", editGIFs, "Edit GIF paths.", new string[] { "gifs" });
             handler.register("cpath", retCurretPath, "Shows the current path.");
+            handler.register("import", importData, "Import data from xml.");
+            handler.register("export", exportData, "Export data to xml.");
+            handler.register("backup", _=>db.Backup(), "Backup sqlite file.");
+            handler.register("use_backup", _ => db.UseBackup(), "Use backup sqlite file and backup current.");
             handler.registerDefault(run);
             appendOutput(welcomeMsg);
             doStartUp();

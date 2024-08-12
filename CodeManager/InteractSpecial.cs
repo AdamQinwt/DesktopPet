@@ -44,7 +44,9 @@ namespace CodeManager
                             }
                             if (cmd[0] == '#')
                             {
-                                cmd = db.FindMatch("path", cmd.Remove(0, 1));
+                                tmpstr = db.FindMatch("path", cmd.Remove(0, 1));
+                                if(tmpstr == "") tmpstr = db.FindMatch("path", cmd.Remove(0, 1));
+                                cmd = tmpstr;
                             }
                         }
                         else
